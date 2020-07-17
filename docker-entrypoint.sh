@@ -1,15 +1,18 @@
 #!/bin/sh
 
-export PDNS_resolver_server PDNS_auth_server PDNS_packet_cache
-export PDNS_webserver PDNS_webserver_password PDNS_webserver_api_key
+: "${PDNS_local_port:=53}"
+: "${PDNS_local_address:=0.0.0.0}"
+: "${PDNS_allow_from:=0.0.0.0/0}"
 
-if [ -f /etc/debian_version ]; then
-	config_file=/etc/dnsdist/dnsdist.conf
-	dnsdist_user=_dnsdist
-fi
+export PDNS_local_port PDNS_local_address PDNS_allow_from
 
-/usr/local/bin/envsubst < /etc/dnsdist/dnsdist.conf.tmpl > $config_file
+CONFIG_FILE=/etc/powerdns/recursor.conf
+PDNS_USER=root
 
-chown ${dnsdist_user}: $config_file
+#/usr/local/bin/envsubst < /etc/dnsdist/dnsdist.conf.tmpl > $config_file
+
+envtpl < /etc/powerdns/recursor.conf.tmpl > ${CONFIG_FILE}
+
+chown ${PDNS_USER}: ${CONFIG_FILE}
 
 exec "$@" 
